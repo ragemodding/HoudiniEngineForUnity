@@ -875,6 +875,7 @@ namespace HoudiniEngineUnity
             }
             else
             {
+                AssetDatabase.DeleteAsset(finalAssetPath);
                 AssetDatabase.CreateAsset(objectToCreate, finalAssetPath);
             }
 
