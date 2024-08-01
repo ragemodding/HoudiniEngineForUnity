@@ -900,7 +900,12 @@ namespace HoudiniEngineUnity
                 // Drag selected points
                 Vector3 handleCenter = bounds.center;
                 isDraggingPoints = (EditorGUIUtility.hotControl != 0);
+<<<<<<< HEAD
                 bool disableCurveScaleRot = asset.CurveDisableScaleRotation;
+=======
+                cookWhileDragging = asset.CurveCookOnDrag;
+                disableCurveScaleRot = asset.CurveDisableScaleRotation;
+>>>>>>> parent of fab8c73 (Removed "cook will dragging functionality" as it caused curves to be uneditable.)
 
 
                 // Use rotation for every handle type
