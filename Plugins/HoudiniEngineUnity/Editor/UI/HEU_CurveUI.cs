@@ -900,8 +900,7 @@ namespace HoudiniEngineUnity
                 // Drag selected points
                 Vector3 handleCenter = bounds.center;
                 isDraggingPoints = (EditorGUIUtility.hotControl != 0);
-                cookWhileDragging = asset.CurveCookOnDrag;
-                disableCurveScaleRot = asset.CurveDisableScaleRotation;
+                bool disableCurveScaleRot = asset.CurveDisableScaleRotation;
 
 
                 // Use rotation for every handle type
