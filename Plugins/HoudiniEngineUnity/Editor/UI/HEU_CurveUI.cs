@@ -1039,7 +1039,7 @@ namespace HoudiniEngineUnity
                                         SerializedProperty pointProperty =
                                             curveNodeProperty.FindPropertyRelative("position");
                                         Vector3 updatedPosition = pointProperty.vector3Value + deltaMove;
-
+                                        RM_CurveEvents.RaiseCurvePointMoved(this, updatedPosition);
                                         HEU_Curve curve = serializedCurve.targetObject as HEU_Curve;
                                         if (curve != null)
                                         {
@@ -1326,7 +1326,7 @@ namespace HoudiniEngineUnity
             Handles.color = lineColor;
             Matrix4x4 defaultMatrix = Handles.matrix;
             Handles.matrix = curve.TargetGameObject.transform.localToWorldMatrix;
-            Handles.DrawAAPolyLine(_lineTexture, 10f, points.ToArray());
+            Handles.DrawAAPolyLine(_lineTexture, 5f, points.ToArray());
             Handles.matrix = defaultMatrix;
             Handles.color = defaultColor;
         }

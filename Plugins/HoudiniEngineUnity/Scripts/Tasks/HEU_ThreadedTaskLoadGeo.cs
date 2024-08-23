@@ -69,6 +69,7 @@ namespace HoudiniEngineUnity
             _assetCachePath = GetValidAssetCacheFolderPath(_name);
 
             _generateOptions = _ownerSync._generateOptions;
+            //_generateOptions._splitPoints = true;
 
             // Work data
             _loadData = new HEU_LoadData();

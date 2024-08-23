@@ -334,7 +334,7 @@ namespace HoudiniEngineUnity
                              currentState == HAPI_PDG_WorkItemState.HAPI_PDG_WORKITEM_COOKED_CACHE)
                     {
                         NotifyTOPNodeCookedWorkItem(assetLink, topNode);
-
+                        _numItemsCompleted++;
                         // On cook success, handle results
                         if (topNode._tags._autoload)
                         {
@@ -417,7 +417,7 @@ namespace HoudiniEngineUnity
 
         private void OnWorkItemLoadResults(HEU_TOPNodeData topNode, HEU_SyncedEventData OnSynced)
         {
-            _numItemsCompleted++;
+            //_numItemsCompleted++;
             CheckCallback(topNode);
         }
 
