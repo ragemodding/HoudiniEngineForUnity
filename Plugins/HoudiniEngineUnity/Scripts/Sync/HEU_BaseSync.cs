@@ -236,17 +236,18 @@ namespace HoudiniEngineUnity
                 return;
             }
 
-            Unload();
-            StartSync();
-        }
-        public virtual void Bake(string outputPath)
-        {
-            if (_syncing)
-            {
-                return;
-            }
+	    Unload();
+	    StartSync();
+	}
 
-            //string outputPath = HEU_AssetDatabase.CreateUniqueBakePath(this.gameObject.name);
+	public virtual void Bake()
+	{
+	    if (_syncing)
+	    {
+		return;
+	    }
+
+	    string outputPath = HEU_AssetDatabase.CreateUniqueBakePath(this.gameObject.name);
 
             GameObject parentObj = HEU_GeneralUtility.CreateNewGameObject(this.gameObject.name);
 
@@ -268,13 +269,8 @@ namespace HoudiniEngineUnity
                 HEU_Logger.LogFormat("Exported prefab to {0}", outputPath);
             }
 
-            GameObject.DestroyImmediate(parentObj);
-        }
-        public virtual void Bake()
-        {
-            string outputPath = HEU_AssetDatabase.CreateUniqueBakePath(this.gameObject.name);
-            Bake(outputPath);
-        }
+	    GameObject.DestroyImmediate(parentObj);
+	}
 
         public virtual void Unload()
         {
@@ -465,25 +461,20 @@ namespace HoudiniEngineUnity
                     {
                         terrain.terrainData = new TerrainData();
 
-                        if (bFullExportTerrainDataPath)
-                        {
-                            string folderPath = HEU_Platform.GetFolderPath(exportTerrainDataPath, true);
-                            HEU_AssetDatabase.CreatePathWithFolders(folderPath);
-                            HEU_AssetDatabase.CreateAsset(terrain.terrainData, exportTerrainDataPath);
-                        }
-                        else
-                        {
-                            string assetPathName = "TerrainData" + HEU_Defines.HEU_EXT_ASSET;
-                            if (File.Exists(exportTerrainDataPath))
-                            {
+			if (bFullExportTerrainDataPath)
+			{
+			    string folderPath = HEU_Platform.GetFolderPath(exportTerrainDataPath, true);
+			    HEU_AssetDatabase.CreatePathWithFolders(folderPath);
+			    HEU_AssetDatabase.CreateAsset(terrain.terrainData, exportTerrainDataPath);
+			}
+			else
+			{
+			    string assetPathName = "TerrainData" + HEU_Defines.HEU_EXT_ASSET;
+			    HEU_AssetDatabase.CreateObjectInAssetCacheFolder(terrain.terrainData, exportTerrainDataPath, null, assetPathName, typeof(TerrainData), true);
+			}
 
-                            }
-                            HEU_AssetDatabase.CreateObjectInAssetCacheFolder(terrain.terrainData, exportTerrainDataPath,
-                                null, assetPathName, typeof(TerrainData), true);
-                        }
-                    }
-
-                    TerrainData terrainData = terrain.terrainData;
+		    }
+		    TerrainData terrainData = terrain.terrainData;
 
 #if !HEU_TERRAIN_COLLIDER_DISABLED
                     collider.terrainData = terrainData;
@@ -497,14 +488,44 @@ namespace HoudiniEngineUnity
                     terrain.drawInstanced = true;
 #endif
 
-                    
+		    int heightMapSize = terrainBuffers[t]._heightMapWidth;
 
-                    // Set position
-                    HAPI_Transform hapiTransformVolume = new HAPI_Transform(true);
-                    hapiTransformVolume.position[0] += terrainBuffers[t]._position[0];
-                    hapiTransformVolume.position[1] += terrainBuffers[t]._position[1];
-                    hapiTransformVolume.position[2] += terrainBuffers[t]._position[2];
-                    HEU_HAPIUtility.ApplyLocalTransfromFromHoudiniToUnity(ref hapiTransformVolume, newTransform);
+		    terrainData.heightmapResolution = heightMapSize;
+		    if (terrainData.heightmapResolution != heightMapSize)
+		    {
+			HEU_Logger.LogErrorFormat("Unsupported terrain size: {0}. Terrain resolution should be a power of 2 + 1.", heightMapSize);
+			continue;
+		    }
+
+		    // The terrainData.baseMapResolution is not set here, but rather left to whatever default Unity uses
+		    // The terrainData.alphamapResolution is set later when setting the alphamaps.
+
+		    // 32 is the default for resolutionPerPatch
+		    const int detailResolution = 1024;
+		    const int resolutionPerPatch = 32;
+		    terrainData.SetDetailResolution(detailResolution, resolutionPerPatch);
+
+		    terrainData.SetHeights(0, 0, terrainBuffers[t]._heightMap);
+
+		    // Note that Unity uses a default height range of 600 when a flat terrain is created.
+		    // Without a non-zero value for the height range, user isn't able to draw heights.
+		    // Therefore, set 600 as the value if height range is currently 0 (due to flat heightfield).
+		    float heightRange = terrainBuffers[t]._heightRange;
+		    if (heightRange == 0)
+		    {
+			heightRange = 600;
+		    }
+
+		    terrainData.size = new Vector3(terrainBuffers[t]._terrainSizeX, heightRange, terrainBuffers[t]._terrainSizeY);
+
+		    terrain.Flush();
+
+		    // Set position
+		    HAPI_Transform hapiTransformVolume = new HAPI_Transform(true);
+		    hapiTransformVolume.position[0] += terrainBuffers[t]._position[0];
+		    hapiTransformVolume.position[1] += terrainBuffers[t]._position[1];
+		    hapiTransformVolume.position[2] += terrainBuffers[t]._position[2];
+		    HEU_HAPIUtility.ApplyLocalTransfromFromHoudiniToUnity(ref hapiTransformVolume, newTransform);
 
                     // Set layers
                     Texture2D defaultTexture = HEU_VolumeCache.LoadDefaultSplatTexture();
@@ -664,42 +685,12 @@ namespace HoudiniEngineUnity
                                 layerFileNameWithExt += HEU_Defines.HEU_EXT_TERRAINLAYER;
                             }
 
-                            HEU_AssetDatabase.CreateObjectInAssetCacheFolder(terrainlayer, exportTerrainDataPath, null,
-                                layerFileNameWithExt, null, true);
-                        }
+			    HEU_AssetDatabase.CreateObjectInAssetCacheFolder(terrainlayer, exportTerrainDataPath, null, layerFileNameWithExt, null, true);
+			
+			}
 
-                        terrainData.terrainLayers = finalTerrainLayers.ToArray();
-                    }
-
-                    int heightMapSize = terrainBuffers[t]._heightMapWidth;
-
-                    terrainData.heightmapResolution = heightMapSize;
-                    if (terrainData.heightmapResolution != heightMapSize)
-                    {
-                        HEU_Logger.LogErrorFormat(
-                            "Unsupported terrain size: {0}. Terrain resolution should be a power of 2 + 1.",
-                            heightMapSize);
-                        continue;
-                    }
-
-                    // The terrainData.baseMapResolution is not set here, but rather left to whatever default Unity uses
-                    // The terrainData.alphamapResolution is set later when setting the alphamaps.
-
-                    // 32 is the default for resolutionPerPatch
-                    const int detailResolution = 1024;
-                    const int resolutionPerPatch = 32;
-                    terrainData.SetDetailResolution(detailResolution, resolutionPerPatch);
-
-                    terrainData.SetHeights(0, 0, terrainBuffers[t]._heightMap);
-
-                    // Note that Unity uses a default height range of 600 when a flat terrain is created.
-                    // Without a non-zero value for the height range, user isn't able to draw heights.
-                    // Therefore, set 600 as the value if height range is currently 0 (due to flat heightfield).
-                    float heightRange = terrainBuffers[t]._heightRange;
-                    if (heightRange == 0)
-                    {
-                        heightRange = 600;
-                    }
+			terrainData.terrainLayers = finalTerrainLayers.ToArray();
+		    }
 
                     terrainData.size = new Vector3(terrainBuffers[t]._terrainSizeX, heightRange,
                         terrainBuffers[t]._terrainSizeY);
@@ -805,11 +796,8 @@ namespace HoudiniEngineUnity
 
                     HAPI_PartId partId = meshBuffers[m]._geoCache.PartID;
 
-                    Transform newTransform = newGameObject.transform;
-
-                    newTransform.parent = parent;
-                    newTransform.position += parent.position;
-                    newTransform.rotation *= parent.rotation;
+		    Transform newTransform = newGameObject.transform;
+		    newTransform.parent = parent;
 
                     HEU_GeneratedOutput generatedOutput = new HEU_GeneratedOutput();
                     generatedOutput._outputData._gameObject = newGameObject;
@@ -1044,25 +1032,21 @@ namespace HoudiniEngineUnity
             // Temporary empty gameobject in case the specified Unity asset is not found
             GameObject tempGO = null;
 
-            //if (instancerBuffer._assetPaths.Length == 1)
-            //{
-            //    // Single asset path
-            //    if (!string.IsNullOrEmpty(instancerBuffer._assetPaths[0]))
-            //    {
-            //        HEU_AssetDatabase.ImportAsset(instancerBuffer._assetPaths[0],
-            //            HEU_AssetDatabase.HEU_ImportAssetOptions.Default);
-            //        singleAssetGO =
-            //            HEU_AssetDatabase.LoadAssetAtPath(instancerBuffer._assetPaths[0], typeof(GameObject)) as
-            //                GameObject;
-            //    }
+	    if (instancerBuffer._assetPaths.Length == 1)
+	    {
+		// Single asset path
+		if (!string.IsNullOrEmpty(instancerBuffer._assetPaths[0]))
+		{
+		    HEU_AssetDatabase.ImportAsset(instancerBuffer._assetPaths[0], HEU_AssetDatabase.HEU_ImportAssetOptions.Default);
+		    singleAssetGO = HEU_AssetDatabase.LoadAssetAtPath(instancerBuffer._assetPaths[0], typeof(GameObject)) as GameObject;
+		}
 
-            //    if (singleAssetGO == null)
-            //    {
-            //        HEU_Logger.LogErrorFormat("Asset at path {0} not found. Unable to create instances for {1}.",
-            //            instancerBuffer._assetPaths[0], instancerBuffer._name);
-            //        return;
-            //    }
-            //}
+		if (singleAssetGO == null)
+		{
+		    HEU_Logger.LogErrorFormat("Asset at path {0} not found. Unable to create instances for {1}.", instancerBuffer._assetPaths[0], instancerBuffer._name);
+		    return;
+		}
+	    }
 
             if (instancerBuffer._collisionAssetPaths != null && instancerBuffer._collisionAssetPaths.Length == 1)
             {

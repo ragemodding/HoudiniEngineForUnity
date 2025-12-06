@@ -3684,14 +3684,14 @@ namespace HoudiniEngineUnity
             }
         }
 
-        public void UploadInputNodes(HEU_SessionBase session, bool bForceUpdate, bool bUpdateAll)
-        {
-            foreach (HEU_InputNode inputNode in _inputNodes)
-            {
-                if (inputNode == null)
-                {
-                    continue;
-                }
+	private void UploadInputNodes(HEU_SessionBase session, bool bForceUpdate, bool bUpdateAll)
+	{
+	    foreach (HEU_InputNode inputNode in _inputNodes)
+	    {
+		if (inputNode == null)
+		{
+		    continue;
+		}
 
                 // Upload all but parameter types, as those are taken care of in the parameter update
                 if ((inputNode.InputType != HEU_InputNode.InputNodeType.PARAMETER || bUpdateAll)

@@ -136,6 +136,33 @@ namespace HoudiniEngineUnity
     };
 
     [StructLayout(LayoutKind.Sequential)]
+    [Serializable]
+    public partial struct HAPI_SessionInfo          //Configurations for sessions
+    {
+        [MarshalAs(UnmanagedType.I4)]
+        public int connectionCount;              //The number of subconnections in this session
+
+        public HAPI_TCP_PortType portType;              //Specification for the port numbers
+
+        [MarshalAs(UnmanagedType.I4)]
+        public int minPort;              //Specifies a range of port numbers [minPort maxPort]
+
+        [MarshalAs(UnmanagedType.I4)]
+        public int maxPort;              //Specifies a range of port numbers [minPort maxPort]
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_MAX_NUM_CONNECTIONS, ArraySubType = UnmanagedType.I4)]
+        public int[] ports;              //Specifies a list of port numbers
+
+        public HAPI_ThriftSharedMemoryBufferType sharedMemoryBufferType;              
+
+        public HAPI_Int64 sharedMemoryBufferSize;              
+
+        [MarshalAs(UnmanagedType.U1)]
+        public HAPI_Bool enableSharedMemoryDataTransfer;              
+
+    };
+
+    [StructLayout(LayoutKind.Sequential)]
     public partial struct HAPI_ThriftServerOptions          //Options to configure a Thrift server being started from HARC.
     {
         [MarshalAs(UnmanagedType.U1)]
@@ -155,14 +182,14 @@ namespace HoudiniEngineUnity
     [StructLayout(LayoutKind.Sequential)]
     public partial struct HAPI_TimelineOptions          //Data for global timeline used with HAPI_SetTimelineOptions
     {
-        [MarshalAs(UnmanagedType.R4)]
-        public float fps;              
+        [MarshalAs(UnmanagedType.R8)]
+        public double fps;              
 
-        [MarshalAs(UnmanagedType.R4)]
-        public float startTime;              
+        [MarshalAs(UnmanagedType.R8)]
+        public double startTime;              
 
-        [MarshalAs(UnmanagedType.R4)]
-        public float endTime;              
+        [MarshalAs(UnmanagedType.R8)]
+        public double endTime;              
 
     };
 
@@ -709,7 +736,6 @@ namespace HoudiniEngineUnity
         [MarshalAs(UnmanagedType.I4)]
         public int tileSize;              //The dimensions of each tile.This can be 8 or 16 denoting an 8x8x8 or 16x16x16 tiles.
 
-        [MarshalAs(UnmanagedType.Struct)]
         public HAPI_Transform transform;              //The transform of the volume with respect to the lengths.The volume may be positioned anywhere in space.
 
         [MarshalAs(UnmanagedType.U1)]
@@ -787,16 +813,16 @@ namespace HoudiniEngineUnity
     [StructLayout(LayoutKind.Sequential)]
     public partial struct HAPI_InputCurveInfo          
     {
-        public HAPI_CurveType curveType;              //The desired curve type of the curveNote that this is NOT necessarily equal to the value in HAPI_CurveInfoin the case of curve refinement
+        public HAPI_CurveType curveType;              //The desired curve type of the curve.Note that this is NOT necessarily equal to the value in HAPI_CurveInfoin the case of curve refinement.
 
         [MarshalAs(UnmanagedType.I4)]
-        public int order;              //The desired order for your input curveThis is your desired order which may differ from HAPI_CurveInfoas it will do range checks and adjust the actual order accordingly
+        public int order;              //The desired order for your input curve.This is your desired order which may differ from HAPI_CurveInfoas it will do range checks and adjust the actual order accordingly.
 
         [MarshalAs(UnmanagedType.U1)]
-        public HAPI_Bool closed;              //Whether or not the curve is closedMay differ from HAPI_CurveInfo::isPeriodic depending on the curveTypee.g. A NURBs curve is never technically closed according to HAPI_CurveInfo
+        public HAPI_Bool closed;              //Whether or not the curve is closed.May differ from HAPI_CurveInfo::isPeriodic depending on the curveTypee.g. A NURBs curve is never technically closed according to HAPI_CurveInfo.
 
         [MarshalAs(UnmanagedType.U1)]
-        public HAPI_Bool reverse;              //Whether or not to reverse the curve input
+        public HAPI_Bool reverse;              //Whether or not to reverse the curve input.
 
         public HAPI_InputCurveMethod inputMethod;              
 

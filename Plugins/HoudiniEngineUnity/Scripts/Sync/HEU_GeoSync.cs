@@ -58,7 +58,6 @@ namespace HoudiniEngineUnity
                 _loadTask = new HEU_ThreadedTaskLoadGeo();
             }
 
-            _loadTask.IsBackground = true;
             _loadTask.SetupLoadFile(session, this, _cookNodeID, _filePath);
             _loadTask.Start();
         }
