@@ -1252,16 +1252,7 @@ namespace HoudiniEngineUnity
         }
 
         // TIME -----------------------------------------------------------------------------------------------------
-
-	public override float GetTime()
-	{
-	    float time = 0;
-	    HAPI_Result result = HEU_HAPIFunctions.HAPI_GetTime(ref _sessionData._HAPISession, out time);
-	    HandleStatusResult(result, "Getting Time", false, true);
-	    return time;
-	}
-
-	public override bool SetTime(float time)
+	public override bool SetTime(double time)
 	{
 	    HAPI_Result result = HEU_HAPIFunctions.HAPI_SetTime(ref _sessionData._HAPISession, time);
 	    HandleStatusResult(result, "Setting Time", false, true);

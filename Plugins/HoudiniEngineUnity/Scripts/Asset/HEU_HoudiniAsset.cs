@@ -3684,7 +3684,7 @@ namespace HoudiniEngineUnity
             }
         }
 
-	private void UploadInputNodes(HEU_SessionBase session, bool bForceUpdate, bool bUpdateAll)
+	public void UploadInputNodes(HEU_SessionBase session, bool bForceUpdate, bool bUpdateAll)
 	{
 	    foreach (HEU_InputNode inputNode in _inputNodes)
 	    {

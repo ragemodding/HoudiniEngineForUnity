@@ -115,19 +115,6 @@ namespace HoudiniEngineUnity
                 ref HAPI_SessionInfo session_info);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
-        HAPI_StartThriftSharedMemoryServer(
-                ref HAPI_ThriftServerOptions options,
-                byte[] shared_mem_name,
-                out HAPI_ProcessId process_id,
-                byte[] log_file);
-        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern HAPI_Result
-        HAPI_CreateThriftSharedMemorySession(
-                out HAPI_Session session,
-                byte[] shared_mem_name,
-                ref HAPI_SessionInfo session_info);
-        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
-        public static extern HAPI_Result
         HAPI_BindCustomImplementation(
                 HAPI_SessionType session_type,
                 byte[] dll_path);
@@ -274,6 +261,19 @@ namespace HoudiniEngineUnity
                 ref HAPI_Session session,
                 byte[] string_value,
                 int length);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetMessageNodeCount(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                out int count);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetMessageNodeIds(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                [Out] HAPI_NodeId[] message_node_ids_array,
+                int count);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
         HAPI_CheckForSpecificErrors(
@@ -1026,6 +1026,21 @@ namespace HoudiniEngineUnity
                 byte[] preset_name,
                 byte[] buffer,
                 int buffer_length);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetPresetCount(
+                ref HAPI_Session session,
+                byte[] buffer,
+                int buffer_length,
+                out int count);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetPresetNames(
+                ref HAPI_Session session,
+                byte[] buffer,
+                int buffer_length,
+                [Out] HAPI_StringHandle[] preset_names_array,
+                int preset_names_count);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
         HAPI_GetObjectInfo(
