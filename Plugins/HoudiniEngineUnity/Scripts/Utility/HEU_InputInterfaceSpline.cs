@@ -28,6 +28,8 @@
 using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
+using Codice.Client.Common;
+
 
 #if UNITY_SPLINES_INSTALLED
 using UnityEngine.Splines;
@@ -272,6 +274,34 @@ namespace HoudiniEngineUnity
             return splineContainerData;
         }
 
+
+
+
+        public struct LerpInt : IInterpolator<int>
+        {
+            /// <summary>
+            /// Linearly interpolates between a and b by t.
+            /// </summary>
+            /// <param name="a">Start value, returned when t = 0.</param>
+            /// <param name="b">End value, returned when t = 1.</param>
+            /// <param name="t">Interpolation ratio.</param>
+            /// <returns> The interpolated result between the two values.</returns>
+            public float Interpolate(float a, float b, float t)
+            {
+                return math.lerp(a, b, t);
+            }
+
+            public int Interpolate(int from, int to, float t)
+            {
+                int eval = from;
+
+                return eval;
+            }
+        }
+
+
+
+
         /// <summary>
         /// Upload the inputData into the input curve node with inputNodeID.
         /// </summary>
@@ -283,11 +313,11 @@ namespace HoudiniEngineUnity
         {
             // Set the input curve info of the newly created input curve
             HAPI_InputCurveInfo inputCurveInfo = new HAPI_InputCurveInfo();
-            inputCurveInfo.curveType = HAPI_CurveType.HAPI_CURVETYPE_BEZIER;
+            inputCurveInfo.curveType = HAPI_CurveType.HAPI_CURVETYPE_LINEAR;
             inputCurveInfo.order = 4;
             inputCurveInfo.closed = inputSpline._closed;
             inputCurveInfo.reverse = false;
-            inputCurveInfo.inputMethod = HAPI_InputCurveMethod.HAPI_CURVEMETHOD_BREAKPOINTS;
+            inputCurveInfo.inputMethod = HAPI_InputCurveMethod.HAPI_CURVEMETHOD_CVS;
             inputCurveInfo.breakpointParameterization =
  HAPI_InputCurveParameterization.HAPI_CURVEPARAMETERIZATION_UNIFORM;
             if (!session.SetInputCurveInfo(inputNodeID, 0, ref inputCurveInfo))
@@ -306,6 +336,8 @@ namespace HoudiniEngineUnity
             float[] posArr;
             float[] rotArr;
             float[] scaleArr;
+            Dictionary<string, float[]> floatAttributes = new Dictionary<string, float[]>();
+            Dictionary<string, int[]> intAttributes = new Dictionary<string, int[]>();
             if (numRefinedSplinePoints <= numControlPoints)
             {
                 // There's not enough refined points, so we'll use the control points instead
@@ -326,14 +358,116 @@ namespace HoudiniEngineUnity
             else
             {
                 // Calculate the refined spline component
-                posArr = new float[numRefinedSplinePoints * 3];
-                rotArr = new float[numRefinedSplinePoints * 4];
-                scaleArr = new float[numRefinedSplinePoints * 3];
+                Dictionary<float, float3> posDistDict = new Dictionary<float, float3>();
+
+               
                 float currentDistance = 0.0f;
+
                 for (int i = 0; i < numRefinedSplinePoints; i++)
                 {
+                    float splineDist = currentDistance;// splineLength;
+
                     float3 pos =
- SplineUtility.EvaluatePosition<Spline>(inputSpline._spline, currentDistance / splineLength);
+ SplineUtility.EvaluatePosition<Spline>(inputSpline._spline, splineDist / splineLength);
+
+                    // For branching sub-splines, apply local transform on vertices to get the merged spline
+                    pos = localToWorld.MultiplyPoint(pos);
+                    posDistDict[splineDist] = pos;
+
+                    currentDistance += splineResolution;
+                }
+
+
+                //Headshots_Ops:
+                //We basically add support for custom attributes by inserting points where the attributes are on the curve.
+                
+                //(disabled for now since it may be enough to snap to the nearest interpolated point so we prevent ver short curve segments which can cause overlapping sweeping geo
+
+                Spline s = inputSpline._spline;
+
+                //foreach (string dataKey in inputSpline._spline.GetFloatDataKeys())
+                //{
+                //    SplineData<float> fSplineData;
+                //    s.TryGetFloatData(dataKey, out fSplineData);
+
+                  
+                //    foreach (float fIndex in fSplineData.Indexes)
+                //    {
+                        
+                //        float dist = fIndex / splineLength;
+                //        float attribVal = fSplineData.Evaluate(s, fIndex, PathIndexUnit.Distance, InterpolatorUtility.LerpFloat);
+                //        float3 pos =
+                //            SplineUtility.EvaluatePosition<Spline>(s, dist);
+
+                //        posDistDict[fIndex] = pos;
+                //    }
+                //}
+
+                //foreach (string dataKey in inputSpline._spline.GetIntDataKeys())
+                //{
+                //    SplineData<int> fSplineData;
+                //    s.TryGetIntData(dataKey, out fSplineData);
+
+
+                //    foreach (float fIndex in fSplineData.Indexes)
+                //    {
+
+                //        float dist = fIndex / splineLength;
+                //        int attribVal = fSplineData.Evaluate(s, fIndex, PathIndexUnit.Distance, new LerpInt());
+                //        float3 pos =
+                //            SplineUtility.EvaluatePosition<Spline>(s, dist);
+
+                //        posDistDict[fIndex] = pos;
+                //    }
+                //}
+
+                Dictionary<float, float3> sortedDict = posDistDict.OrderBy(f => f.Key).ToDictionary(k => k.Key, v => v.Value);
+
+                
+                //Custom float data
+                foreach (string dataKey in inputSpline._spline.GetFloatDataKeys())
+                {
+                    List<float> values = new List<float>();
+                    foreach (float dist in sortedDict.Keys)
+                    {
+                        SplineData<float> fSplineData;
+                        s.TryGetFloatData(dataKey, out fSplineData);
+
+                        
+                        float attribVal = fSplineData.Evaluate(s, dist, PathIndexUnit.Distance, InterpolatorUtility.LerpFloat);
+                         
+                        values.Add(attribVal);
+                    }
+                    floatAttributes[dataKey] = values.ToArray();
+                        
+                }
+                //Custom int data
+                foreach (string dataKey in inputSpline._spline.GetIntDataKeys())
+                {
+                    List<int> values = new List<int>();
+                    foreach (float dist in sortedDict.Keys)
+                    {
+                        SplineData<int> fSplineData;
+                        s.TryGetIntData(dataKey, out fSplineData);
+
+                 
+                        int attribVal = fSplineData.Evaluate(s, dist, PathIndexUnit.Distance, new LerpInt());
+
+                        values.Add((int)attribVal);
+                    }
+                    intAttributes[dataKey] = values.ToArray();
+
+                }
+
+                int elemCount = sortedDict.Count;
+
+                posArr = new float[elemCount * 3];
+                rotArr = new float[elemCount * 4];
+                scaleArr = new float[elemCount * 3];
+
+                for (int i = 0; i < elemCount; i++)
+                {
+                    float3 pos = sortedDict.Values.ElementAt(i);
 
                     // For branching sub-splines, apply local transform on vertices to get the merged spline
                     pos = localToWorld.MultiplyPoint(pos);
@@ -342,6 +476,8 @@ namespace HoudiniEngineUnity
                     currentDistance += splineResolution;
                 }
             }
+
+           
 
             bool hasRotations = rotArr.Length == posArr.Length;
             bool hasScales = scaleArr.Length == posArr.Length;
@@ -359,6 +495,54 @@ namespace HoudiniEngineUnity
                     scaleArr, 0, 0
                 );
             }
+
+            //Custom Attribs
+
+            HAPI_PartInfo partInfos = new HAPI_PartInfo();
+            session.GetPartInfo(inputNodeID, 0, ref partInfos);
+
+            partInfos.attributeCounts[(int)HAPI_AttributeOwner.HAPI_ATTROWNER_POINT] += 1;
+
+            bool pi = session.SetPartInfo(inputNodeID, 0, ref partInfos);
+
+ 
+
+            foreach (var kvp in floatAttributes)
+            {
+                HAPI_AttributeInfo attributeInfo = new HAPI_AttributeInfo
+                {
+                    owner = HAPI_AttributeOwner.HAPI_ATTROWNER_POINT,
+                    originalOwner = HAPI_AttributeOwner.HAPI_ATTROWNER_POINT,
+                    exists = true,
+                    storage = HAPI_StorageType.HAPI_STORAGETYPE_FLOAT,
+                    count = kvp.Value.Length,
+                    tupleSize = 1,
+                };
+                bool add = session.AddAttribute(inputNodeID, 0, kvp.Key, ref attributeInfo);
+                HEU_GeneralUtility.SetAttribute<float>(inputNodeID, 0, kvp.Key, ref attributeInfo, kvp.Value, session.SetAttributeFloatData);
+            }
+
+            foreach (var kvp in intAttributes)
+            {
+                HAPI_AttributeInfo attributeInfo = new HAPI_AttributeInfo
+                {
+                    owner = HAPI_AttributeOwner.HAPI_ATTROWNER_POINT,
+                    originalOwner = HAPI_AttributeOwner.HAPI_ATTROWNER_POINT,
+                    exists = true,
+                    storage = HAPI_StorageType.HAPI_STORAGETYPE_INT,
+                    count = kvp.Value.Length,
+                    tupleSize = 1,
+                };
+                bool add = session.AddAttribute(inputNodeID, 0, kvp.Key, ref attributeInfo);
+                HEU_GeneralUtility.SetAttribute<int>(inputNodeID, 0, kvp.Key, ref attributeInfo, kvp.Value, session.SetAttributeIntData);
+            }
+
+
+
+            //session.GetAttributeInfo(inputNodeID, 0, "width", HAPI_AttributeOwner.HAPI_ATTROWNER_POINT, ref attributeInfo);
+
+
+            //HEU_GeneralUtility.SetAttribute<float>(inputNodeID, 0, "width", ref attributeInfo, testData, session.SetAttributeFloatData);
 
             if (!hapi_result)
             {

@@ -53,7 +53,6 @@ namespace HoudiniEngineUnity
     using HAPI_ParmId = System.Int32;
     using HAPI_PartId = System.Int32;
     using HAPI_PDG_WorkItemId = System.Int32;
-    using HAPI_PDG_WorkitemId = System.Int32;
     using HAPI_PDG_GraphContextId = System.Int32;
     using HAPI_HIPFileId = System.Int32;
     using HAPI_ErrorCodeBits = System.Int32;
@@ -61,6 +60,7 @@ namespace HoudiniEngineUnity
     using HAPI_NodeFlagsBits = System.Int32;
 
     [StructLayout(LayoutKind.Sequential)]
+    [Serializable]
     public partial struct HAPI_Transform          //A Transform with Quaternion rotation
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_POSITION_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
@@ -112,6 +112,30 @@ namespace HoudiniEngineUnity
     };
 
     [StructLayout(LayoutKind.Sequential)]
+    [Serializable]
+    public partial struct HAPI_SessionInfo          //Configurations for sessions
+    {
+        [MarshalAs(UnmanagedType.I4)]
+        public int connectionCount;              //The number of subconnections in this session
+
+        public HAPI_TCP_PortType portType;              //Specification for the port numbers
+
+        [MarshalAs(UnmanagedType.I4)]
+        public int minPort;              //Specifies a range of port numbers [minPort maxPort]
+
+        [MarshalAs(UnmanagedType.I4)]
+        public int maxPort;              //Specifies a range of port numbers [minPort maxPort]
+
+        [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_MAX_NUM_CONNECTIONS, ArraySubType = UnmanagedType.I4)]
+        public int[] ports;              //Specifies a list of port numbers
+
+        public HAPI_ThriftSharedMemoryBufferType sharedMemoryBufferType;              
+
+        public HAPI_Int64 sharedMemoryBufferSize;              
+
+    };
+
+    [StructLayout(LayoutKind.Sequential)]
     public partial struct HAPI_ThriftServerOptions          //Options to configure a Thrift server being started from HARC.
     {
         [MarshalAs(UnmanagedType.U1)]
@@ -121,6 +145,10 @@ namespace HoudiniEngineUnity
         public float timeoutMs;              //Timeout in milliseconds for waiting on the server tosignal that it ready to serve. If the server failsto signal within this time interval the start server call failsand the server process is terminated.
 
         public HAPI_StatusVerbosity verbosity;              
+
+        public HAPI_ThriftSharedMemoryBufferType sharedMemoryBufferType;              
+
+        public HAPI_Int64 sharedMemoryBufferSize;              
 
     };
 

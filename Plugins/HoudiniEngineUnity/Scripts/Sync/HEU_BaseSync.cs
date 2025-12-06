@@ -98,6 +98,7 @@ namespace HoudiniEngineUnity
                         deleteID = GetParentNodeID(session);
                     }
 
+                    Debug.Log($"Deleting Session Data for: {name}");
                     session.DeleteNode(deleteID);
                 }
 
@@ -238,15 +239,14 @@ namespace HoudiniEngineUnity
             Unload();
             StartSync();
         }
-
-        public virtual void Bake()
+        public virtual void Bake(string outputPath)
         {
             if (_syncing)
             {
                 return;
             }
 
-            string outputPath = HEU_AssetDatabase.CreateUniqueBakePath(this.gameObject.name);
+            //string outputPath = HEU_AssetDatabase.CreateUniqueBakePath(this.gameObject.name);
 
             GameObject parentObj = HEU_GeneralUtility.CreateNewGameObject(this.gameObject.name);
 
@@ -269,6 +269,11 @@ namespace HoudiniEngineUnity
             }
 
             GameObject.DestroyImmediate(parentObj);
+        }
+        public virtual void Bake()
+        {
+            string outputPath = HEU_AssetDatabase.CreateUniqueBakePath(this.gameObject.name);
+            Bake(outputPath);
         }
 
         public virtual void Unload()
@@ -801,7 +806,10 @@ namespace HoudiniEngineUnity
                     HAPI_PartId partId = meshBuffers[m]._geoCache.PartID;
 
                     Transform newTransform = newGameObject.transform;
+
                     newTransform.parent = parent;
+                    newTransform.position += parent.position;
+                    newTransform.rotation *= parent.rotation;
 
                     HEU_GeneratedOutput generatedOutput = new HEU_GeneratedOutput();
                     generatedOutput._outputData._gameObject = newGameObject;
@@ -1036,25 +1044,25 @@ namespace HoudiniEngineUnity
             // Temporary empty gameobject in case the specified Unity asset is not found
             GameObject tempGO = null;
 
-            if (instancerBuffer._assetPaths.Length == 1)
-            {
-                // Single asset path
-                if (!string.IsNullOrEmpty(instancerBuffer._assetPaths[0]))
-                {
-                    HEU_AssetDatabase.ImportAsset(instancerBuffer._assetPaths[0],
-                        HEU_AssetDatabase.HEU_ImportAssetOptions.Default);
-                    singleAssetGO =
-                        HEU_AssetDatabase.LoadAssetAtPath(instancerBuffer._assetPaths[0], typeof(GameObject)) as
-                            GameObject;
-                }
+            //if (instancerBuffer._assetPaths.Length == 1)
+            //{
+            //    // Single asset path
+            //    if (!string.IsNullOrEmpty(instancerBuffer._assetPaths[0]))
+            //    {
+            //        HEU_AssetDatabase.ImportAsset(instancerBuffer._assetPaths[0],
+            //            HEU_AssetDatabase.HEU_ImportAssetOptions.Default);
+            //        singleAssetGO =
+            //            HEU_AssetDatabase.LoadAssetAtPath(instancerBuffer._assetPaths[0], typeof(GameObject)) as
+            //                GameObject;
+            //    }
 
-                if (singleAssetGO == null)
-                {
-                    HEU_Logger.LogErrorFormat("Asset at path {0} not found. Unable to create instances for {1}.",
-                        instancerBuffer._assetPaths[0], instancerBuffer._name);
-                    return;
-                }
-            }
+            //    if (singleAssetGO == null)
+            //    {
+            //        HEU_Logger.LogErrorFormat("Asset at path {0} not found. Unable to create instances for {1}.",
+            //            instancerBuffer._assetPaths[0], instancerBuffer._name);
+            //        return;
+            //    }
+            //}
 
             if (instancerBuffer._collisionAssetPaths != null && instancerBuffer._collisionAssetPaths.Length == 1)
             {

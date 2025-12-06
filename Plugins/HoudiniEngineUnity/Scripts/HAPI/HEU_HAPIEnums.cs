@@ -52,7 +52,6 @@ namespace HoudiniEngineUnity
     using HAPI_ParmId = System.Int32;
     using HAPI_PartId = System.Int32;
     using HAPI_PDG_WorkItemId = System.Int32;
-    using HAPI_PDG_WorkitemId = System.Int32;
     using HAPI_PDG_GraphContextId = System.Int32;
     using HAPI_HIPFileId = System.Int32;
     using HAPI_ErrorCodeBits = System.Int32;
@@ -68,6 +67,8 @@ namespace HoudiniEngineUnity
         HAPI_LICENSE_HOUDINI_ENGINE_INDIE,        
         HAPI_LICENSE_HOUDINI_INDIE,        
         HAPI_LICENSE_HOUDINI_ENGINE_UNITY_UNREAL,        
+        HAPI_LICENSE_HOUDINI_EDUCATION,        
+        HAPI_LICENSE_HOUDINI_ENGINE_EDUCATION,        
         HAPI_LICENSE_MAX,        
     };
 
@@ -88,6 +89,13 @@ namespace HoudiniEngineUnity
         HAPI_STATUSVERBOSITY_ERRORS = HAPI_STATUSVERBOSITY_0,        //Used for Results. Equivalent to HAPI_STATUSVERBOSITY_0
         HAPI_STATUSVERBOSITY_WARNINGS = HAPI_STATUSVERBOSITY_1,        //Used for Results. Equivalent to HAPI_STATUSVERBOSITY_1
         HAPI_STATUSVERBOSITY_MESSAGES = HAPI_STATUSVERBOSITY_2,        //Used for Results. Equivalent to HAPI_STATUSVERBOSITY_2
+    };
+
+    public enum HAPI_JobStatus          
+    {
+        HAPI_JOB_STATUS_RUNNING,        
+        HAPI_JOB_STATUS_IDLE,        
+        HAPI_JOB_STATUS_MAX,        
     };
 
     public enum HAPI_Result          
@@ -230,6 +238,7 @@ namespace HoudiniEngineUnity
         HAPI_PRM_SCRIPT_TYPE_DIR,        //"dir" "direction"
         HAPI_PRM_SCRIPT_TYPE_COLOR,        //"color" "rgb"
         HAPI_PRM_SCRIPT_TYPE_COLOR4,        //"color4" "rgba"
+        HAPI_PRM_SCRIPT_TYPE_HUECIRCLE,        
         HAPI_PRM_SCRIPT_TYPE_OPPATH,        
         HAPI_PRM_SCRIPT_TYPE_OPLIST,        
         HAPI_PRM_SCRIPT_TYPE_OBJECT,        
@@ -309,7 +318,7 @@ namespace HoudiniEngineUnity
         HAPI_NODEFLAGS_SOP_CURVE = 1 << 11,        //SOP Node Specific FlagsLooks for "curve"
         HAPI_NODEFLAGS_SOP_GUIDE = 1 << 12,        //Looks for Guide Geometry
         HAPI_NODEFLAGS_TOP_NONSCHEDULER = 1 << 13,        //TOP Node Specific FlagsAll TOP nodes except schedulers
-        HAPI_NODEFLAGS_NON_BYPASS = 1 << 14 ,        //Nodes that are not bypassed
+        HAPI_NODEFLAGS_NON_BYPASS = 1 << 14,        //Recursive FlagNodes that are not bypassed
     };
 
     public enum HAPI_GroupType          
@@ -596,6 +605,7 @@ namespace HoudiniEngineUnity
         HAPI_PDG_EVENT_WORKITEM_SET_FLOAT,        //Deprecated
         HAPI_PDG_EVENT_WORKITEM_SET_STRING,        //Deprecated
         HAPI_PDG_EVENT_WORKITEM_SET_FILE,        //Deprecated
+        HAPI_PDG_EVENT_WORKITEM_SET_DICT,        //Deprecated
         HAPI_PDG_EVENT_WORKITEM_SET_PYOBJECT,        //Deprecated
         HAPI_PDG_EVENT_WORKITEM_SET_GEOMETRY,        //Deprecated
         HAPI_PDG_EVENT_WORKITEM_MERGE,        //Deprecated
@@ -629,6 +639,19 @@ namespace HoudiniEngineUnity
         HAPI_PDG_WORKITEM_COOKED_FAIL,        
         HAPI_PDG_WORKITEM_COOKED_CANCEL,        
         HAPI_PDG_WORKITEM_DIRTY,        
+    };
+
+    public enum HAPI_TCP_PortType          
+    {
+        HAPI_TCP_PORT_ANY,        
+        HAPI_TCP_PORT_RANGE,        
+        HAPI_TCP_PORT_LIST,        
+    };
+
+    public enum HAPI_ThriftSharedMemoryBufferType          
+    {
+        HAPI_THRIFT_SHARED_MEMORY_FIXED_LENGTH_BUFFER,        
+        HAPI_THRIFT_SHARED_MEMORY_RING_BUFFER,        
     };
 
 

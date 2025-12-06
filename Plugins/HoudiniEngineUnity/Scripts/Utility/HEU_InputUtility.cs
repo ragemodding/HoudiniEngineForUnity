@@ -26,6 +26,7 @@
 
 using System.Collections.Generic;
 using UnityEngine;
+using UnityEngine.UIElements;
 
 namespace HoudiniEngineUnity
 {
@@ -80,7 +81,7 @@ namespace HoudiniEngineUnity
                     {
                         if (_inputInterfaces[i] != null && _inputInterfaces[i].Priority <= inputInterface.Priority)
                         {
-                            _inputInterfaces.Add(inputInterface);
+                            _inputInterfaces.Insert(i, inputInterface);
                             //HEU_Logger.LogFormat("Registered {0} at {1}. Total of {2}", inputInterface.GetType(), i, _inputInterfaces.Count);
                             break;
                         }
@@ -354,7 +355,12 @@ namespace HoudiniEngineUnity
             }
             else
             {
-                inputTransform = inputObject._gameObject.transform.localToWorldMatrix;
+                Vector3 position = inputObject._gameObject.transform.position;
+                Quaternion rotation = inputObject._gameObject.transform.rotation;
+                Vector3 scale = inputObject._gameObject.transform.lossyScale;
+
+                Vector3 rotEul = rotation.eulerAngles;
+                inputTransform = HEU_HAPIUtility.GetMatrix4x4(ref position, ref rotEul, ref scale);
             }
 
             HAPI_TransformEuler transformEuler = HEU_HAPIUtility.GetHAPITransformFromMatrix(ref inputTransform);

@@ -129,6 +129,12 @@ namespace HoudiniEngineUnity
                     case HAPI_License.HAPI_LICENSE_HOUDINI_ENGINE_UNITY_UNREAL:
                         sb.Append("Houdini Engine for Unity/Unreal\n");
                         break;
+                    case HAPI_License.HAPI_LICENSE_HOUDINI_EDUCATION:
+                        sb.Append("Houdini Education\n");
+                        break;
+                    case HAPI_License.HAPI_LICENSE_HOUDINI_ENGINE_EDUCATION:
+                        sb.Append("Houdini Engine Education\n");
+                        break;
                     default:
                         sb.Append("Unknown\n");
                         break;
@@ -886,7 +892,11 @@ namespace HoudiniEngineUnity
         public static HEU_HoudiniAssetRoot GetAssetInScene(HAPI_NodeId assetID)
         {
             HEU_HoudiniAssetRoot foundAsset = null;
+#if UNITY_6000_0_OR_NEWER
+            HEU_HoudiniAssetRoot[] houdiniAssets = GameObject.FindObjectsByType<HEU_HoudiniAssetRoot>(FindObjectsSortMode.None);
+#else
             HEU_HoudiniAssetRoot[] houdiniAssets = GameObject.FindObjectsOfType<HEU_HoudiniAssetRoot>();
+#endif
 
             foreach (HEU_HoudiniAssetRoot assetRoot in houdiniAssets)
             {
@@ -1535,8 +1545,12 @@ namespace HoudiniEngineUnity
             return false;
         }
 
-        static internal void GatherAllAssetGeoInfos(HEU_SessionBase session, HAPI_AssetInfo assetInfo, HAPI_ObjectInfo objectInfo,
-            bool bUseOutputNodes, ref List<HAPI_GeoInfo> outGeoInfos)
+        static internal void GatherAllAssetGeoInfos(HEU_SessionBase session, 
+            HAPI_AssetInfo assetInfo, 
+            HAPI_ObjectInfo objectInfo,
+            bool bUseOutputNodes, 
+            bool bGetEditableNodes,
+            ref List<HAPI_GeoInfo> outGeoInfos)
         {
             if (outGeoInfos == null) outGeoInfos = new List<HAPI_GeoInfo>();
 
@@ -1564,8 +1578,17 @@ namespace HoudiniEngineUnity
 
             // Get editable nodes, cook em, then create geo nodes for them
             HAPI_NodeId[] editableNodes = null;
-            HEU_SessionManager.GetComposedChildNodeList(session, assetInfo.nodeId, (int)HAPI_NodeType.HAPI_NODETYPE_SOP,
-                (int)HAPI_NodeFlags.HAPI_NODEFLAGS_EDITABLE, true, out editableNodes, false);
+            if (bGetEditableNodes)
+            {
+                HEU_SessionManager.GetComposedChildNodeList(session, assetInfo.nodeId, (int)HAPI_NodeType.HAPI_NODETYPE_SOP,
+                    (int)HAPI_NodeFlags.HAPI_NODEFLAGS_EDITABLE, true, out editableNodes, false);
+
+                if (editableNodes == null || editableNodes.Length == 0)
+                {
+                    HEU_Logger.LogWarning("Edit tools are enabled but no editable nodes were found in the HDA. Ensure the HDA is unlocked in Houdini and recook.");
+                }
+            }
+
             if (editableNodes != null)
             {
                 foreach (HAPI_NodeId editNodeID in editableNodes)
@@ -1876,25 +1899,9 @@ namespace HoudiniEngineUnity
 
                 if (info.partCount <= 0) requiresCook = true;
 
-                // Not sure if this is necessary. TODO: Remove if not needed
-                //if (!requiresCook)
-                //{
-                //    // Recook assets with invalid parts
-                //    int numParts = info.partCount;
-                //    for (int i = 0; i < numParts; ++i)
-                //    {
-                //        HAPI_PartInfo partInfo = new HAPI_PartInfo();
-                //        if (!session.GetPartInfo(info.nodeId, i, ref partInfo))
-                //        {
-                //            continue;
-                //        }
-                //	if (partInfo.id < 0 || partInfo.type == HAPI_PartType.HAPI_PARTTYPE_INVALID)
-                //	{
-                //	    requiresCook = true;
-                //	    break;
-                //	}
-                //    }
-                //}
+                // #Bug:137052. info.hasGeoChanged can be false when this is called as the info has already been
+                // read elsewhere. So without a big architecture change, we need to cook the node here too.
+                requiresCook = true;
 
                 if (requiresCook)
                 {

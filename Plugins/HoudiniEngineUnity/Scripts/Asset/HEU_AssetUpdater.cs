@@ -65,7 +65,7 @@ namespace HoudiniEngineUnity
         static HEU_AssetUpdater()
         {
 #if UNITY_EDITOR && HOUDINIENGINEUNITY_ENABLED
-            EditorApplication.update += Update;
+            EditorApplication.update += Update; //Alexander 02/05 disabled this because it could cause long domain reloads
 
             AssemblyReloadEvents.beforeAssemblyReload += OnBeforeAssemblyReload;
 

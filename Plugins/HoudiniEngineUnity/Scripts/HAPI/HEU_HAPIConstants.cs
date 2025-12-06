@@ -52,7 +52,6 @@ namespace HoudiniEngineUnity
     using HAPI_ParmId = System.Int32;
     using HAPI_PartId = System.Int32;
     using HAPI_PDG_WorkItemId = System.Int32;
-    using HAPI_PDG_WorkitemId = System.Int32;
     using HAPI_PDG_GraphContextId = System.Int32;
     using HAPI_HIPFileId = System.Int32;
     using HAPI_ErrorCodeBits = System.Int32;
@@ -73,6 +72,7 @@ namespace HoudiniEngineUnity
         public const int HAPI_PRIM_MIN_VERTEX_COUNT = 1;
         public const int HAPI_PRIM_MAX_VERTEX_COUNT = 16;
         public const int HAPI_INVALID_PARM_ID = -1;
+        public const int HAPI_MAX_NUM_CONNECTIONS = 128;
         public const string HAPI_ATTRIB_POSITION = "P";
         public const string HAPI_ATTRIB_UV = "uv";
         public const string HAPI_ATTRIB_UV2 = "uv2";

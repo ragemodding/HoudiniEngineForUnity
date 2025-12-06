@@ -59,7 +59,6 @@ namespace HoudiniEngineUnity
     using HAPI_ParmId = System.Int32;
     using HAPI_PartId = System.Int32;
     using HAPI_PDG_WorkItemId = System.Int32;
-    using HAPI_PDG_WorkitemId = System.Int32;
     using HAPI_PDG_GraphContextId = System.Int32;
     using HAPI_HIPFileId = System.Int32;
     using HAPI_ErrorCodeBits = System.Int32;
@@ -72,7 +71,8 @@ namespace HoudiniEngineUnity
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
         HAPI_CreateInProcessSession(
-                out HAPI_Session session);
+                out HAPI_Session session,
+                ref HAPI_SessionInfo session_info);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
         HAPI_StartThriftSocketServer(
@@ -85,7 +85,8 @@ namespace HoudiniEngineUnity
         HAPI_CreateThriftSocketSession(
                 out HAPI_Session session,
                 byte[] host_name,
-                int port);
+                int port,
+                ref HAPI_SessionInfo session_info);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
         HAPI_StartThriftNamedPipeServer(
@@ -97,7 +98,21 @@ namespace HoudiniEngineUnity
         public static extern HAPI_Result
         HAPI_CreateThriftNamedPipeSession(
                 out HAPI_Session session,
-                byte[] pipe_name);
+                byte[] pipe_name,
+                ref HAPI_SessionInfo session_info);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_StartThriftSharedMemoryServer(
+                ref HAPI_ThriftServerOptions options,
+                byte[] shared_mem_name,
+                out HAPI_ProcessId process_id,
+                byte[] log_file);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_CreateThriftSharedMemorySession(
+                out HAPI_Session session,
+                byte[] shared_mem_name,
+                ref HAPI_SessionInfo session_info);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
         HAPI_BindCustomImplementation(
@@ -141,6 +156,18 @@ namespace HoudiniEngineUnity
         public static extern HAPI_Result
         HAPI_Shutdown(
                 ref HAPI_Session session);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_StartPerformanceMonitorProfile(
+                ref HAPI_Session session,
+                byte[] title,
+                out int profile_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_StopPerformanceMonitorProfile(
+                ref HAPI_Session session,
+                int profile_id,
+                byte[] file_path);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
         HAPI_GetEnvInt(
@@ -473,6 +500,24 @@ namespace HoudiniEngineUnity
                 int choice_length);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
+        HAPI_GetAssetDefinitionParmTagName(
+                ref HAPI_Session session,
+                HAPI_AssetLibraryId library_id,
+                byte[] asset_name,
+                HAPI_ParmId parm_id,
+                int tag_index,
+                out HAPI_StringHandle tag_name);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAssetDefinitionParmTagValue(
+                ref HAPI_Session session,
+                HAPI_AssetLibraryId library_id,
+                byte[] asset_name,
+                HAPI_ParmId parm_id,
+                byte[] tag_name,
+                out HAPI_StringHandle tag_value);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
         HAPI_GetLoadedAssetLibraryCount(
                 ref HAPI_Session session,
                 out int count);
@@ -576,12 +621,14 @@ namespace HoudiniEngineUnity
         public static extern HAPI_Result
         HAPI_CreateInputNode(
                 ref HAPI_Session session,
+                HAPI_NodeId parent_node_id,
                 out HAPI_NodeId node_id,
                 byte[] name);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
         HAPI_CreateInputCurveNode(
                 ref HAPI_Session session,
+                HAPI_NodeId parent_node_id,
                 out HAPI_NodeId node_id,
                 byte[] name);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
@@ -981,6 +1028,21 @@ namespace HoudiniEngineUnity
                 int buffer_length);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
+        HAPI_GetPresetCount(
+                ref HAPI_Session session,
+                byte[] buffer,
+                int buffer_length,
+                out int count);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetPresetNames(
+                ref HAPI_Session session,
+                byte[] buffer,
+                int buffer_length,
+                [Out] HAPI_StringHandle[] preset_names_array,
+                int count);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
         HAPI_GetObjectInfo(
                 ref HAPI_Session session,
                 HAPI_NodeId node_id,
@@ -1340,6 +1402,253 @@ namespace HoudiniEngineUnity
                 [Out] int[] sizes_fixed_array,
                 int start,
                 int sizes_fixed_length);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeIntDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                int stride,
+                [Out] int[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeUInt8DataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                int stride,
+                [Out] HAPI_UInt8[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeInt8DataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                int stride,
+                [Out] HAPI_Int8[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeInt16DataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                int stride,
+                [Out] HAPI_Int16[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeInt64DataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                int stride,
+                [Out] HAPI_Int64[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeFloatDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                int stride,
+                [Out] float[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeFloat64DataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                int stride,
+                [Out] double[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeStringDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                [Out] HAPI_StringHandle[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeDictionaryDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                [Out] HAPI_StringHandle[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeIntArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] attr_name,
+                ref HAPI_AttributeInfo attr_info,
+                [Out] int[] data_fixed_array,
+                int data_fixed_length,
+                [Out] int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeUInt8ArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] attr_name,
+                ref HAPI_AttributeInfo attr_info,
+                [Out] HAPI_UInt8[] data_fixed_array,
+                int data_fixed_length,
+                [Out] int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeInt8ArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] attr_name,
+                ref HAPI_AttributeInfo attr_info,
+                [Out] HAPI_Int8[] data_fixed_array,
+                int data_fixed_length,
+                [Out] int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeInt16ArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] attr_name,
+                ref HAPI_AttributeInfo attr_info,
+                [Out] HAPI_Int16[] data_fixed_array,
+                int data_fixed_length,
+                [Out] int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeInt64ArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] attr_name,
+                ref HAPI_AttributeInfo attr_info,
+                [Out] HAPI_Int64[] data_fixed_array,
+                int data_fixed_length,
+                [Out] int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeFloatArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] attr_name,
+                ref HAPI_AttributeInfo attr_info,
+                [Out] float[] data_fixed_array,
+                int data_fixed_length,
+                [Out] int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeFloat64ArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] attr_name,
+                ref HAPI_AttributeInfo attr_info,
+                [Out] double[] data_fixed_array,
+                int data_fixed_length,
+                [Out] int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeStringArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] attr_name,
+                ref HAPI_AttributeInfo attr_info,
+                [Out] HAPI_StringHandle[] data_fixed_array,
+                int data_fixed_length,
+                [Out] int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetAttributeDictionaryArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] attr_name,
+                ref HAPI_AttributeInfo attr_info,
+                [Out] HAPI_StringHandle[] data_fixed_array,
+                int data_fixed_length,
+                [Out] int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_GetJobStatus(
+                ref HAPI_Session session,
+                int job_id,
+                out HAPI_JobStatus job_status);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
         HAPI_GetGroupNames(
@@ -1774,6 +2083,358 @@ namespace HoudiniEngineUnity
                 int[] sizes_fixed_array,
                 int start,
                 int sizes_fixed_length);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeIntDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                int[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeUInt8DataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                HAPI_UInt8[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeInt8DataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                HAPI_Int8[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeInt16DataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                HAPI_Int16[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeInt64DataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                HAPI_Int64[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeFloatDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                float[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeFloat64DataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                double[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeStringDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                string[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeIndexedStringDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                string[] string_array,
+                int string_count,
+                int[] indices_array,
+                int indices_start,
+                int indices_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeStringUniqueDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                byte[] data_array,
+                int data_length,
+                int start_index,
+                int num_indices,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeIntUniqueDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                int[] data_array,
+                int data_length,
+                int start_index,
+                int num_indices,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeUInt8UniqueDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                HAPI_UInt8[] data_array,
+                int data_length,
+                int start_index,
+                int num_indices,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeInt8UniqueDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                HAPI_Int8[] data_array,
+                int data_length,
+                int start_index,
+                int num_indices,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeInt16UniqueDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                HAPI_Int16[] data_array,
+                int data_length,
+                int start_index,
+                int num_indices,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeInt64UniqueDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                HAPI_Int64[] data_array,
+                int data_length,
+                int start_index,
+                int num_indices,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeFloatUniqueDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                float[] data_array,
+                int data_length,
+                int start_index,
+                int num_indices,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeFloat64UniqueDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                double[] data_array,
+                int data_length,
+                int start_index,
+                int num_indices,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeDictionaryDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                string[] data_array,
+                int start,
+                int length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeIntArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                int[] data_fixed_array,
+                int data_fixed_length,
+                int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeUInt8ArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                HAPI_UInt8[] data_fixed_array,
+                int data_fixed_length,
+                int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeInt8ArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                HAPI_Int8[] data_fixed_array,
+                int data_fixed_length,
+                int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeInt16ArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                HAPI_Int16[] data_fixed_array,
+                int data_fixed_length,
+                int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeInt64ArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                HAPI_Int64[] data_fixed_array,
+                int data_fixed_length,
+                int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeFloatArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                float[] data_fixed_array,
+                int data_fixed_length,
+                int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeFloat64ArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                double[] data_fixed_array,
+                int data_fixed_length,
+                int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeStringArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                string[] data_fixed_array,
+                int data_fixed_length,
+                int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
+        [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
+        public static extern HAPI_Result
+        HAPI_SetAttributeDictionaryArrayDataAsync(
+                ref HAPI_Session session,
+                HAPI_NodeId node_id,
+                HAPI_PartId part_id,
+                byte[] name,
+                ref HAPI_AttributeInfo attr_info,
+                string[] data_fixed_array,
+                int data_fixed_length,
+                int[] sizes_fixed_array,
+                int start,
+                int sizes_fixed_length,
+                out int job_id);
         [DllImport(HEU_HoudiniVersion.HAPI_LIBRARY, CallingConvention = CallingConvention.Cdecl)]
         public static extern HAPI_Result
         HAPI_AddGroup(

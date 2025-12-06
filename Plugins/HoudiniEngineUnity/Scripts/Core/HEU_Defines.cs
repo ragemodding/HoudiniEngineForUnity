@@ -76,6 +76,10 @@ namespace HoudiniEngineUnity
         public const string HEU_SESSION_PIPENAME = "hapi";
         public const string HEU_SESSION_LOCALHOST = "localhost";
         public const int HEU_SESSION_PORT = 9090;
+        public const string HEU_SESSION_SHARED_MEMORY_NAME = "hapi";
+        public const int HEU_SESSION_SHARED_MEMORY_BUFFER_SIZE = 100;
+        public const HAPI_ThriftSharedMemoryBufferType HEU_SESSION_SHARED_MEMORY_BUFFER_TYPE
+            = HAPI_ThriftSharedMemoryBufferType.HAPI_THRIFT_SHARED_MEMORY_RING_BUFFER;
         public const float HEU_SESSION_TIMEOUT = 10000f;
         public const bool HEU_SESSION_AUTOCLOSE = true;
 
@@ -99,7 +103,7 @@ namespace HoudiniEngineUnity
         public const string HAPI_ATTRIB_ORIENT = "orient";
         public const string HAPI_ATTRIB_ROTATION = "rot";
         public const string HAPI_ATTRIB_SCALE = "scale";
-        public const string HAPI_ATTRIB_ALPHA = "Alpha";
+        public const string HAPI_ATTRIB_ALPHA = "_Alpha";
         public const string HAPI_HANDLE_TRANSFORM = "xform";
         public const int HAPI_MAX_UVS = 8;
 

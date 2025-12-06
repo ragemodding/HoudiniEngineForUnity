@@ -279,7 +279,6 @@ namespace HoudiniEngineUnity
             set { _editableNodesToolsEnabled = value; }
         }
 
-
         // Read only ====
 
         /// <inheritdoc />
@@ -763,7 +762,13 @@ namespace HoudiniEngineUnity
         internal bool PendingAutoCookOnMouseRelease
         {
             get { return _pendingAutoCookOnMouseRelease; }
-            set { _pendingAutoCookOnMouseRelease = value; }
+            set
+            {
+                if (_autoCookOnParameterChange)
+                    _pendingAutoCookOnMouseRelease = value;
+                else
+                    _pendingAutoCookOnMouseRelease = false;
+            }
         }
 
         // Enum to guess how Unity instantiated this object (because Unity doesn't provide instantiation callbacks)
@@ -1922,6 +1927,8 @@ namespace HoudiniEngineUnity
                 RequestReload(false);
             }
 
+            _editableNodesToolsEnabled = HEU_PluginSettings.EditableNodesToolsEnabled;
+
             // If there are curves they need to be cooked.
             if (Curves != null)
             {
@@ -2755,7 +2762,7 @@ namespace HoudiniEngineUnity
             // since Houdini Engine will update the parameter values automatically.
             if (HEU_PluginSettings.PushUnityTransformToHoudini && PushTransformToHoudini)
             {
-                UploadUnityTransform(session, !_isCookingAssetReloaded);
+                //UploadUnityTransform(session, !_isCookingAssetReloaded); I (headshots) disabled this because I always want actual world coords when uploading mesh data
             }
 
             bool bParamsUpdated = false;
@@ -3677,7 +3684,7 @@ namespace HoudiniEngineUnity
             }
         }
 
-        private void UploadInputNodes(HEU_SessionBase session, bool bForceUpdate, bool bUpdateAll)
+        public void UploadInputNodes(HEU_SessionBase session, bool bForceUpdate, bool bUpdateAll)
         {
             foreach (HEU_InputNode inputNode in _inputNodes)
             {
@@ -3870,7 +3877,7 @@ namespace HoudiniEngineUnity
         private HEU_ObjectNode CreateObjectNode(HEU_SessionBase session, ref HAPI_ObjectInfo objectInfo, ref HAPI_Transform objectTranform)
         {
             HEU_ObjectNode objectNode = ScriptableObject.CreateInstance<HEU_ObjectNode>();
-            objectNode.Initialize(session, objectInfo, objectTranform, this, _useOutputNodes);
+            objectNode.Initialize(session, objectInfo, objectTranform, this, _useOutputNodes, _editableNodesToolsEnabled);
             return objectNode;
         }
 
@@ -4666,7 +4673,11 @@ namespace HoudiniEngineUnity
         /// <param name="bShow">True to show</param>
         internal static void SetCurvesVisibilityInScene(bool bShow)
         {
+#if UNITY_6000_0_OR_NEWER
+            HEU_HoudiniAsset[] houdiniAssets = GameObject.FindObjectsByType<HEU_HoudiniAsset>(FindObjectsSortMode.None);
+#else
             HEU_HoudiniAsset[] houdiniAssets = GameObject.FindObjectsOfType<HEU_HoudiniAsset>();
+#endif
             foreach (HEU_HoudiniAsset asset in houdiniAssets)
             {
                 List<HEU_Curve> curves = asset.Curves;
