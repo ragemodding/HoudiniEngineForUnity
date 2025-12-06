@@ -40,16 +40,16 @@ namespace HoudiniEngineUnity
         public class HEU_HoudiniVersion
         {
                 public const int HOUDINI_MAJOR			= 20;
-                public const int HOUDINI_MINOR			= 5;
-                public const int HOUDINI_BUILD			= 654;
+                public const int HOUDINI_MINOR			= 0;
+                public const int HOUDINI_BUILD			= 862;
                 public const int HOUDINI_PATCH			= 0;
 
-                public const string HOUDINI_VERSION_STRING = "20.5.654";
+                public const string HOUDINI_VERSION_STRING = "20.0.862";
 
-                public const int HOUDINI_ENGINE_MAJOR	= 7;
-                public const int HOUDINI_ENGINE_MINOR	= 0;
+                public const int HOUDINI_ENGINE_MAJOR	= 6;
+                public const int HOUDINI_ENGINE_MINOR	= 2;
 
-                public const int HOUDINI_ENGINE_API		= 10;
+                public const int HOUDINI_ENGINE_API		= 3;
 
                 public const int UNITY_PLUGIN_VERSION	= 2;
 
