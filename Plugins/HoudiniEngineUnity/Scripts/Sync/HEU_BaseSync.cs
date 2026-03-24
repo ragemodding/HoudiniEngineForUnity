@@ -499,12 +499,12 @@ namespace HoudiniEngineUnity
 
 
 
-                    // Set position
-                    HAPI_Transform hapiTransformVolume = new HAPI_Transform(true);
-                    hapiTransformVolume.position[0] += terrainBuffers[t]._position[0];
-                    hapiTransformVolume.position[1] += terrainBuffers[t]._position[1];
-                    hapiTransformVolume.position[2] += terrainBuffers[t]._position[2];
-                    HEU_HAPIUtility.ApplyLocalTransfromFromHoudiniToUnity(ref hapiTransformVolume, newTransform);
+		    // Set position
+		    HAPI_Transform hapiTransformVolume = new HAPI_Transform(true);
+		    hapiTransformVolume.position[0] += terrainBuffers[t]._position[0];
+		    hapiTransformVolume.position[1] += terrainBuffers[t]._position[1];
+		    hapiTransformVolume.position[2] += terrainBuffers[t]._position[2];
+		    HEU_HAPIUtility.ApplyLocalTransfromFromHoudiniToUnity(ref hapiTransformVolume, newTransform);
 
                     // Set layers
                     Texture2D defaultTexture = HEU_VolumeCache.LoadDefaultSplatTexture();
@@ -664,9 +664,9 @@ namespace HoudiniEngineUnity
                                 layerFileNameWithExt += HEU_Defines.HEU_EXT_TERRAINLAYER;
                             }
 
-                            HEU_AssetDatabase.CreateObjectInAssetCacheFolder(terrainlayer, exportTerrainDataPath, null,
-                                layerFileNameWithExt, null, true);
-                        }
+			    HEU_AssetDatabase.CreateObjectInAssetCacheFolder(terrainlayer, exportTerrainDataPath, null, layerFileNameWithExt, null, true);
+			
+			}
 
                         terrainData.terrainLayers = finalTerrainLayers.ToArray();
                     }

@@ -64,18 +64,18 @@ namespace HoudiniEngineUnity
     public partial struct HAPI_Transform          //A Transform with Quaternion rotation
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_POSITION_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
-        public float[] position;              
+        public float[] position;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_QUATERNION_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
-        public float[] rotationQuaternion;              
+        public float[] rotationQuaternion;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_SCALE_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
-        public float[] scale;              
+        public float[] scale;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_SHEAR_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
-        public float[] shear;              
+        public float[] shear;
 
-        public HAPI_RSTOrder rstOrder;              
+        public HAPI_RSTOrder rstOrder;
 
     };
 
@@ -84,20 +84,20 @@ namespace HoudiniEngineUnity
     public partial struct HAPI_TransformEuler          //A Transform with Euler rotation
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_POSITION_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
-        public float[] position;              
+        public float[] position;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_EULER_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
-        public float[] rotationEuler;              
+        public float[] rotationEuler;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_SCALE_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
-        public float[] scale;              
+        public float[] scale;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_SHEAR_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
-        public float[] shear;              
+        public float[] shear;
 
-        public HAPI_XYZOrder rotationOrder;              
+        public HAPI_XYZOrder rotationOrder;
 
-        public HAPI_RSTOrder rstOrder;              
+        public HAPI_RSTOrder rstOrder;
 
     };
 
@@ -129,12 +129,12 @@ namespace HoudiniEngineUnity
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_MAX_NUM_CONNECTIONS, ArraySubType = UnmanagedType.I4)]
         public int[] ports;              //Specifies a list of port numbers
 
-        public HAPI_ThriftSharedMemoryBufferType sharedMemoryBufferType;              
+        public HAPI_ThriftSharedMemoryBufferType sharedMemoryBufferType;
 
-        public HAPI_Int64 sharedMemoryBufferSize;              
+        public HAPI_Int64 sharedMemoryBufferSize;
 
         [MarshalAs(UnmanagedType.U1)]
-        public HAPI_Bool enableSharedMemoryDataTransfer;              
+        public HAPI_Bool enableSharedMemoryDataTransfer;
 
     };
 
@@ -147,11 +147,11 @@ namespace HoudiniEngineUnity
         [MarshalAs(UnmanagedType.R4)]
         public float timeoutMs;              //Timeout in milliseconds for waiting on the server tosignal that it ready to serve. If the server failsto signal within this time interval the start server call failsand the server process is terminated.
 
-        public HAPI_StatusVerbosity verbosity;              
+        public HAPI_StatusVerbosity verbosity;
 
-        public HAPI_ThriftSharedMemoryBufferType sharedMemoryBufferType;              
+        public HAPI_ThriftSharedMemoryBufferType sharedMemoryBufferType;
 
-        public HAPI_Int64 sharedMemoryBufferSize;              
+        public HAPI_Int64 sharedMemoryBufferSize;
 
     };
 
@@ -159,13 +159,13 @@ namespace HoudiniEngineUnity
     public partial struct HAPI_TimelineOptions          //Data for global timeline used with HAPI_SetTimelineOptions
     {
         [MarshalAs(UnmanagedType.R8)]
-        public double fps;              
+        public double fps;
 
         [MarshalAs(UnmanagedType.R8)]
-        public double startTime;              
+        public double startTime;
 
         [MarshalAs(UnmanagedType.R8)]
-        public double endTime;              
+        public double endTime;
 
     };
 
@@ -274,13 +274,13 @@ namespace HoudiniEngineUnity
     [Serializable]
     public partial struct HAPI_NodeInfo          //Meta-data for a Houdini Node
     {
-        public HAPI_NodeId id;              
+        public HAPI_NodeId id;
 
-        public HAPI_NodeId parentId;              
+        public HAPI_NodeId parentId;
 
-        public HAPI_StringHandle nameSH;              
+        public HAPI_StringHandle nameSH;
 
-        public HAPI_NodeType type;              
+        public HAPI_NodeType type;
 
         [MarshalAs(UnmanagedType.U1)]
         public HAPI_Bool isValid;              //Always true unless the asset definition has changed due to loadinga duplicate asset definition and from another OTL asset libraryfile OR deleting the OTL asset library file used by this node asset.
@@ -448,9 +448,9 @@ namespace HoudiniEngineUnity
     [Serializable]
     public partial struct HAPI_ParmChoiceInfo          //Meta-data for a combo-box / choice parm
     {
-        public HAPI_ParmId parentParmId;              
+        public HAPI_ParmId parentParmId;
 
-        public HAPI_StringHandle labelSH;              
+        public HAPI_StringHandle labelSH;
 
         public HAPI_StringHandle valueSH;              //This evaluates to the value of the token associated with the labelapplies to string menus only.
 
@@ -460,12 +460,12 @@ namespace HoudiniEngineUnity
     [Serializable]
     public partial struct HAPI_HandleInfo          //Contains handle information such as the type of handletranslate rotate scale softxform ...etc and the number ofparameters the current handle is bound to.
     {
-        public HAPI_StringHandle nameSH;              
+        public HAPI_StringHandle nameSH;
 
-        public HAPI_StringHandle typeNameSH;              
+        public HAPI_StringHandle typeNameSH;
 
         [MarshalAs(UnmanagedType.I4)]
-        public int bindingsCount;              
+        public int bindingsCount;
 
     };
 
@@ -473,14 +473,14 @@ namespace HoudiniEngineUnity
     [Serializable]
     public partial struct HAPI_HandleBindingInfo          //Contains binding information that maps the handle parameter tothe asset parameter. The index is only used for int and float vectorand colour parms.
     {
-        public HAPI_StringHandle handleParmNameSH;              
+        public HAPI_StringHandle handleParmNameSH;
 
-        public HAPI_StringHandle assetParmNameSH;              
+        public HAPI_StringHandle assetParmNameSH;
 
-        public HAPI_ParmId assetParmId;              
+        public HAPI_ParmId assetParmId;
 
         [MarshalAs(UnmanagedType.I4)]
-        public int assetParmIndex;              
+        public int assetParmIndex;
 
     };
 
@@ -488,7 +488,7 @@ namespace HoudiniEngineUnity
     [Serializable]
     public partial struct HAPI_ObjectInfo          //Meta-data for an OBJ Node
     {
-        public HAPI_StringHandle nameSH;              
+        public HAPI_StringHandle nameSH;
 
         public HAPI_StringHandle objectInstancePathSH;              //@deprecated This member is no longer used
 
@@ -520,9 +520,9 @@ namespace HoudiniEngineUnity
     [Serializable]
     public partial struct HAPI_GeoInfo          //Meta-data for a SOP Node
     {
-        public HAPI_GeoType type;              
+        public HAPI_GeoType type;
 
-        public HAPI_StringHandle nameSH;              
+        public HAPI_StringHandle nameSH;
 
         public HAPI_NodeId nodeId;              //Use the node id to get the node parameters.Using the HDK you can also get the raw node C++ pointer for thisobject internal node.
 
@@ -574,7 +574,7 @@ namespace HoudiniEngineUnity
         public int pointCount;              //Number of points. Note that this is NOT the numberof "positions" as "points" may imply. If yourgeometry has 3 points then set this to 3 and not 3*3.
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = (int)HAPI_AttributeOwner.HAPI_ATTROWNER_MAX, ArraySubType = UnmanagedType.I4)]
-        public int[] attributeCounts;              
+        public int[] attributeCounts;
 
         [MarshalAs(UnmanagedType.U1)]
         public HAPI_Bool isInstanced;              //If this is true don display this part. Load its data but theninstance it where the corresponding instancer part tells you toinstance it.
@@ -595,11 +595,11 @@ namespace HoudiniEngineUnity
     public partial struct HAPI_AttributeInfo          //Meta-data describing an attributeSee HAPI_Attributes.
     {
         [MarshalAs(UnmanagedType.U1)]
-        public HAPI_Bool exists;              
+        public HAPI_Bool exists;
 
-        public HAPI_AttributeOwner owner;              
+        public HAPI_AttributeOwner owner;
 
-        public HAPI_StorageType storage;              
+        public HAPI_StorageType storage;
 
         public HAPI_AttributeOwner originalOwner;              //When converting from the Houdini native GA geometry format to theGT geometry format HAPI uses some attributes might change owners.For example in Houdini GA curves can have points shared byvertices but the GT format only supports curve verticesno points. This means that if you had point attributes on a curvein Houdini when it comes out of HAPI those point attributes will nowbe vertex attributes. In this case the HAPI_AttributeInfo::ownerwill be set to HAPI_ATTROWNER_VERTEX but theHAPI_AttributeInfo::originalOwner will be HAPI_ATTROWNER_POINT.
 
@@ -616,26 +616,26 @@ namespace HoudiniEngineUnity
     };
 
     [StructLayout(LayoutKind.Sequential)]
-    public partial struct HAPI_MaterialInfo          
+    public partial struct HAPI_MaterialInfo
     {
         public HAPI_NodeId nodeId;              //This is the HAPI node id for the SHOP node this material is attachedto. Use it to get access to the parameters which contain thetexture paths.IMPORTANT: When the HAPI_MaterialInfo::hasChanged is true thisnodeId could have changed. Do not assume HAPI_MaterialInfo::nodeIdwill never change for a specific material.
 
         [MarshalAs(UnmanagedType.U1)]
-        public HAPI_Bool exists;              
+        public HAPI_Bool exists;
 
         [MarshalAs(UnmanagedType.U1)]
-        public HAPI_Bool hasChanged;              
+        public HAPI_Bool hasChanged;
 
     };
 
     [StructLayout(LayoutKind.Sequential)]
     public partial struct HAPI_ImageFileFormat          //Describes an image format used with HAPI_GetSupportedImageFileFormats
     {
-        public HAPI_StringHandle nameSH;              
+        public HAPI_StringHandle nameSH;
 
-        public HAPI_StringHandle descriptionSH;              
+        public HAPI_StringHandle descriptionSH;
 
-        public HAPI_StringHandle defaultExtensionSH;              
+        public HAPI_StringHandle defaultExtensionSH;
 
     };
 
@@ -645,17 +645,17 @@ namespace HoudiniEngineUnity
         public HAPI_StringHandle imageFileFormatNameSH;              //Unlike the other members of this struct changing imageFileFormatNameSHand giving this struct back to HAPI_SetImageInfo nothing will happen.Use this member variable to derive which image file format will be usedby the HAPI_ExtractImageToFile and HAPI_ExtractImageToMemoryfunctions if called with image_file_format_name set to NULL. This wayyou can decide whether to ask for a file format conversion slower ornot faster.Read-only
 
         [MarshalAs(UnmanagedType.I4)]
-        public int xRes;              
+        public int xRes;
 
         [MarshalAs(UnmanagedType.I4)]
-        public int yRes;              
+        public int yRes;
 
-        public HAPI_ImageDataFormat dataFormat;              
+        public HAPI_ImageDataFormat dataFormat;
 
         [MarshalAs(UnmanagedType.U1)]
         public HAPI_Bool interleaved;              //ex: true = RGBRGBRGB false = RRRGGGBBB
 
-        public HAPI_ImagePacking packing;              
+        public HAPI_ImagePacking packing;
 
         [MarshalAs(UnmanagedType.R8)]
         public double gamma;              //Adjust the gamma of the image. For anything less thanHAPI_IMAGE_DATA_INT16 you probably want to leave this as 2.2.
@@ -666,25 +666,25 @@ namespace HoudiniEngineUnity
     public partial struct HAPI_Keyframe          //Data for a single Key Frame
     {
         [MarshalAs(UnmanagedType.R4)]
-        public float time;              
+        public float time;
 
         [MarshalAs(UnmanagedType.R4)]
-        public float value;              
+        public float value;
 
         [MarshalAs(UnmanagedType.R4)]
-        public float inTangent;              
+        public float inTangent;
 
         [MarshalAs(UnmanagedType.R4)]
-        public float outTangent;              
+        public float outTangent;
 
     };
 
     [StructLayout(LayoutKind.Sequential)]
     public partial struct HAPI_VolumeInfo          //This represents a volume primitive but does not contain the actual voxelvalues which can be retrieved on a per-tile basis.See HAPI_Volumes.
     {
-        public HAPI_StringHandle nameSH;              
+        public HAPI_StringHandle nameSH;
 
-        public HAPI_VolumeType type;              
+        public HAPI_VolumeType type;
 
         [MarshalAs(UnmanagedType.I4)]
         public int xLength;              //Each voxel is identified with an index. The indices will rangebetween:[  minX minY minZ   minX+xLength minY+yLength minZ+zLength  @{@}
@@ -729,36 +729,36 @@ namespace HoudiniEngineUnity
     public partial struct HAPI_VolumeTileInfo          //A HAPI_VolumeTileInfo represents an cube subarray of the volume.The size of each dimension is HAPI_VolumeInfo::tileSizebbox [minX minY minZ minX+tileSize minY+tileSize minZ+tileSize
     {
         [MarshalAs(UnmanagedType.I4)]
-        public int minX;              
+        public int minX;
 
         [MarshalAs(UnmanagedType.I4)]
-        public int minY;              
+        public int minY;
 
         [MarshalAs(UnmanagedType.I4)]
-        public int minZ;              
+        public int minZ;
 
         [MarshalAs(UnmanagedType.U1)]
-        public HAPI_Bool isValid;              
+        public HAPI_Bool isValid;
 
     };
 
     [StructLayout(LayoutKind.Sequential)]
     public partial struct HAPI_VolumeVisualInfo          //Describes the visual settings of a volume.
     {
-        public HAPI_VolumeVisualType type;              
+        public HAPI_VolumeVisualType type;
 
         [MarshalAs(UnmanagedType.R4)]
-        public float iso;              
+        public float iso;
 
         [MarshalAs(UnmanagedType.R4)]
-        public float density;              
+        public float density;
 
     };
 
     [StructLayout(LayoutKind.Sequential)]
     public partial struct HAPI_CurveInfo          //Represents the meta-data associated with a curve mesh a numberof curves of the same type.
     {
-        public HAPI_CurveType curveType;              
+        public HAPI_CurveType curveType;
 
         [MarshalAs(UnmanagedType.I4)]
         public int curveCount;              //The number of curves contained in this curve mesh.
@@ -787,7 +787,7 @@ namespace HoudiniEngineUnity
     };
 
     [StructLayout(LayoutKind.Sequential)]
-    public partial struct HAPI_InputCurveInfo          
+    public partial struct HAPI_InputCurveInfo
     {
         public HAPI_CurveType curveType;              //The desired curve type of the curve.Note that this is NOT necessarily equal to the value in HAPI_CurveInfoin the case of curve refinement.
 
@@ -800,9 +800,9 @@ namespace HoudiniEngineUnity
         [MarshalAs(UnmanagedType.U1)]
         public HAPI_Bool reverse;              //Whether or not to reverse the curve input.
 
-        public HAPI_InputCurveMethod inputMethod;              
+        public HAPI_InputCurveMethod inputMethod;
 
-        public HAPI_InputCurveParameterization breakpointParameterization;              
+        public HAPI_InputCurveParameterization breakpointParameterization;
 
     };
 
@@ -810,13 +810,13 @@ namespace HoudiniEngineUnity
     public partial struct HAPI_BoxInfo          //Data for a Box Part
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_POSITION_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
-        public float[] center;              
+        public float[] center;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_SCALE_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
-        public float[] size;              
+        public float[] size;
 
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_EULER_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
-        public float[] rotation;              
+        public float[] rotation;
 
     };
 
@@ -824,10 +824,10 @@ namespace HoudiniEngineUnity
     public partial struct HAPI_SphereInfo          //Data for a Sphere Part
     {
         [MarshalAs(UnmanagedType.ByValArray, SizeConst = HEU_HAPIConstants.HAPI_POSITION_VECTOR_SIZE, ArraySubType = UnmanagedType.R4)]
-        public float[] center;              
+        public float[] center;
 
         [MarshalAs(UnmanagedType.R4)]
-        public float radius;              
+        public float radius;
 
     };
 
