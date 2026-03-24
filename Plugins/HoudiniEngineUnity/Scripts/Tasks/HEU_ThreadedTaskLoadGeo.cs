@@ -1326,7 +1326,7 @@ namespace HoudiniEngineUnity
         private LoadType _loadType;
         private string _filePath;
 
-        private HEU_LoadData _loadData;
+        public HEU_LoadData _loadData;
 
         public class HEU_LoadData
         {

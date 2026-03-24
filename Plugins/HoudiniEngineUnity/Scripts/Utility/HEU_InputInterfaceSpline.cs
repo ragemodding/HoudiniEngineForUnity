@@ -29,6 +29,10 @@ using System.Collections.Generic;
 using System.Linq;
 using UnityEngine;
 using Codice.Client.Common;
+using System.Collections;
+using NUnit.Framework;
+
+
 
 
 #if UNITY_SPLINES_INSTALLED
@@ -311,6 +315,7 @@ namespace HoudiniEngineUnity
         /// <returns>True if successfully uploaded data</returns>
         public bool UploadData(HEU_SessionBase session, HAPI_NodeId inputNodeID, HEU_InputDataSpline inputSpline, Matrix4x4 localToWorld)
         {
+            Spline s = inputSpline._spline;
             // Set the input curve info of the newly created input curve
             HAPI_InputCurveInfo inputCurveInfo = new HAPI_InputCurveInfo();
             inputCurveInfo.curveType = HAPI_CurveType.HAPI_CURVETYPE_LINEAR;
@@ -338,6 +343,9 @@ namespace HoudiniEngineUnity
             float[] scaleArr;
             Dictionary<string, float[]> floatAttributes = new Dictionary<string, float[]>();
             Dictionary<string, int[]> intAttributes = new Dictionary<string, int[]>();
+            Dictionary<float, float3> posDistDict = new Dictionary<float, float3>();
+
+
             if (numRefinedSplinePoints <= numControlPoints)
             {
                 // There's not enough refined points, so we'll use the control points instead
@@ -350,15 +358,57 @@ namespace HoudiniEngineUnity
 
                     // For branching sub-splines, apply local transform on vertices to get the merged spline
                     float3 pos = localToWorld.MultiplyPoint(knot.Position);
-                    
+
                     HEU_HAPIUtility.ConvertPositionUnityToHoudini(pos, out posArr[i * 3 + 0], out posArr[i * 3 + 1], out posArr[i * 3 + 2]);
                     HEU_HAPIUtility.ConvertRotationUnityToHoudini(knot.Rotation, out rotArr[i * 4 + 0], out rotArr[i * 4 + 1], out rotArr[i * 4 + 2], out rotArr[i * 4 + 3]);
                 }
+                //Custom attribute data (headshots_ops)
+                //Custom float data
+                foreach (string dataKey in inputSpline._spline.GetFloatDataKeys())
+                {
+                    List<float> values = new List<float>();
+
+                    SplineData<float> fSplineData;
+
+                    s.TryGetFloatData(dataKey, out fSplineData);
+
+                    for (int knotIndex = 0; knotIndex < numControlPoints; knotIndex++)
+                    {
+
+                        float attribVal = fSplineData.Evaluate(s, knotIndex, PathIndexUnit.Distance, InterpolatorUtility.LerpFloat);
+
+                        values.Add(attribVal);
+                    }
+                    
+                    floatAttributes[dataKey] = values.ToArray();
+
+                }
+                //Custom int data
+                foreach (string dataKey in inputSpline._spline.GetIntDataKeys())
+                {
+                    List<int> values = new List<int>();
+
+                    SplineData<int> fSplineData;
+
+                    s.TryGetIntData(dataKey, out fSplineData);
+
+                    for (int knotIndex = 0; knotIndex < numControlPoints; knotIndex++)
+                    {
+
+                        int attribVal = fSplineData.Evaluate(s, knotIndex, PathIndexUnit.Distance, new LerpInt());
+
+                        values.Add(attribVal);
+                    }
+
+                    intAttributes[dataKey] = values.ToArray();
+
+                }
+
             }
             else
             {
                 // Calculate the refined spline component
-                Dictionary<float, float3> posDistDict = new Dictionary<float, float3>();
+
 
                
                 float currentDistance = 0.0f;
@@ -383,7 +433,7 @@ namespace HoudiniEngineUnity
                 
                 //(disabled for now since it may be enough to snap to the nearest interpolated point so we prevent ver short curve segments which can cause overlapping sweeping geo
 
-                Spline s = inputSpline._spline;
+
 
                 //foreach (string dataKey in inputSpline._spline.GetFloatDataKeys())
                 //{

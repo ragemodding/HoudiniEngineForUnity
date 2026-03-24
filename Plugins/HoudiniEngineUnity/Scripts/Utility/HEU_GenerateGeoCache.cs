@@ -989,14 +989,32 @@ namespace HoudiniEngineUnity
             HEU_GeneratedOutput generatedOutput, int defaultMaterialKey, bool bGenerateUVs, bool bGenerateTangents,
             bool bGenerateNormals, bool bPartInstanced)
         {
-            int numLODs = GeoGroupMeshes.Count;
+
+
+            //ragemodding edit, we want to have multiple meshes possible per LOD level, based on the naming lod%d
+            Dictionary<int, List<HEU_GeoGroup>> lodGeos = new Dictionary<HAPI_NodeId, List<HEU_GeoGroup>>();
+
+            foreach (HEU_GeoGroup geoGroup in GeoGroupMeshes)
+            {
+                string grpName = geoGroup._groupName;
+                string sLodLevel = grpName.Split('_')[0].Substring(3, 1); //Assumes lod0 naming convention
+                int lodLevel = int.Parse(sLodLevel);
+
+                if (!lodGeos.ContainsKey(lodLevel))
+                {
+                    lodGeos[lodLevel] = new List<HEU_GeoGroup>();
+                }
+                lodGeos[lodLevel].Add(geoGroup);
+            }
+
+            int numLODs = lodGeos.Count;
             if (numLODs == 0)
             {
                 return false;
             }
 
             // Sort the LOD groups alphabetically by group names
-            GeoGroupMeshes.Sort();
+            //GeoGroupMeshes.Sort();
 
             // Use default transition if user hasn't specified them. Sort by decreasing transition value (1 to 0)
             if (geoCache._LODTransitionValues == null || geoCache._LODTransitionValues.Length == 0)
@@ -1046,14 +1064,24 @@ namespace HoudiniEngineUnity
             LOD[] lods = new LOD[numLODs];
             for (int l = 0; l < numLODs; ++l)
             {
-                Mesh newMesh = null;
-                Material[] newMaterials = null;
-                bool bGenerated = GenerateMeshFromGeoGroup(session, GeoGroupMeshes[l], geoCache, defaultMaterialKey,
-                    bGenerateUVs, bGenerateTangents, bGenerateNormals,
-                    bPartInstanced, out newMesh, out newMaterials);
+                List<MeshRenderer> renderers = new List<MeshRenderer>();
 
-                if (bGenerated)
+                for (int i =0; i < lodGeos[l].Count; i++)
                 {
+                    Mesh newMesh = null;
+                    Material[] newMaterials = null;
+                    bool bGenerated = GenerateMeshFromGeoGroup(session, lodGeos[l][i], geoCache, defaultMaterialKey,
+                        bGenerateUVs, bGenerateTangents, bGenerateNormals,
+                        bPartInstanced, out newMesh, out newMaterials);
+
+                    if (!bGenerated)
+                    {
+                        HEU_Logger.LogError("Failed to create LOD mesh with group name: " + lodGeos[l][i]._groupName);
+                        return false;
+                        
+                    }
+
+
                     HEU_GeneratedOutputData childOutput = null;
 
                     // Get final materials after comparing previously genereated, newly generated, and user override (currently set on MeshRenderer).
@@ -1074,7 +1102,7 @@ namespace HoudiniEngineUnity
                         // No child output found, so setup new child output
 
                         childOutput = new HEU_GeneratedOutputData();
-                        childOutput._gameObject = HEU_GeneralUtility.CreateNewGameObject(GeoGroupMeshes[l]._groupName);
+                        childOutput._gameObject = HEU_GeneralUtility.CreateNewGameObject(lodGeos[l][i]._groupName);
                         newGeneratedChildOutputs.Add(childOutput);
 
                         finalMaterials = newMaterials;
@@ -1103,15 +1131,13 @@ namespace HoudiniEngineUnity
                         HEU_GeneralUtility.GetOrCreateComponent<MeshRenderer>(childOutput._gameObject);
                     meshRenderer.sharedMaterials = finalMaterials;
 
-                    float screenThreshold = geoCache._LODTransitionValues[l];
+                    renderers.Add(meshRenderer);
+                    
                     //HEU_Logger.Log("Threshold: " + screenThreshold + " for " + GeoGroupMeshes[l]._groupName);
-                    lods[l] = new LOD(screenThreshold, new MeshRenderer[] { meshRenderer });
+                    
                 }
-                else
-                {
-                    HEU_Logger.LogError("Failed to create LOD mesh with group name: " + GeoGroupMeshes[l]._groupName);
-                    return false;
-                }
+                float screenThreshold = geoCache._LODTransitionValues[l];
+                lods[l] = new LOD(screenThreshold, renderers.ToArray());
             }
 
             // Destroy and remove extra LOD children previously generated

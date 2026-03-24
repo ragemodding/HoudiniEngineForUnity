@@ -474,6 +474,10 @@ namespace HoudiniEngineUnity
                         else
                         {
                             string assetPathName = "TerrainData" + HEU_Defines.HEU_EXT_ASSET;
+                            if (File.Exists(exportTerrainDataPath))
+                            {
+
+                            }
                             HEU_AssetDatabase.CreateObjectInAssetCacheFolder(terrain.terrainData, exportTerrainDataPath,
                                 null, assetPathName, typeof(TerrainData), true);
                         }
@@ -493,40 +497,7 @@ namespace HoudiniEngineUnity
                     terrain.drawInstanced = true;
 #endif
 
-                    int heightMapSize = terrainBuffers[t]._heightMapWidth;
 
-                    terrainData.heightmapResolution = heightMapSize;
-                    if (terrainData.heightmapResolution != heightMapSize)
-                    {
-                        HEU_Logger.LogErrorFormat(
-                            "Unsupported terrain size: {0}. Terrain resolution should be a power of 2 + 1.",
-                            heightMapSize);
-                        continue;
-                    }
-
-                    // The terrainData.baseMapResolution is not set here, but rather left to whatever default Unity uses
-                    // The terrainData.alphamapResolution is set later when setting the alphamaps.
-
-                    // 32 is the default for resolutionPerPatch
-                    const int detailResolution = 1024;
-                    const int resolutionPerPatch = 32;
-                    terrainData.SetDetailResolution(detailResolution, resolutionPerPatch);
-
-                    terrainData.SetHeights(0, 0, terrainBuffers[t]._heightMap);
-
-                    // Note that Unity uses a default height range of 600 when a flat terrain is created.
-                    // Without a non-zero value for the height range, user isn't able to draw heights.
-                    // Therefore, set 600 as the value if height range is currently 0 (due to flat heightfield).
-                    float heightRange = terrainBuffers[t]._heightRange;
-                    if (heightRange == 0)
-                    {
-                        heightRange = 600;
-                    }
-
-                    terrainData.size = new Vector3(terrainBuffers[t]._terrainSizeX, heightRange,
-                        terrainBuffers[t]._terrainSizeY);
-
-                    terrain.Flush();
 
                     // Set position
                     HAPI_Transform hapiTransformVolume = new HAPI_Transform(true);

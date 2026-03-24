@@ -713,7 +713,8 @@ namespace HoudiniEngineUnity
                     string groupName = inputDataMeshes._inputMeshes[g]._meshName;
                     if (!groupName.StartsWith(HEU_Defines.HEU_DEFAULT_LOD_NAME))
                     {
-                        groupName = HEU_Defines.HEU_DEFAULT_LOD_NAME + g + "_" + groupName;
+                        int lodIndex = inputDataMeshes._inputMeshes[g]._LODIndex;
+                        groupName = HEU_Defines.HEU_DEFAULT_LOD_NAME + lodIndex + "_" + groupName;
                     }
 
                     groupName = HEU_HAPIUtility.ToHapiVariableName(groupName);
@@ -1308,6 +1309,7 @@ namespace HoudiniEngineUnity
             public uint[] _indexCount;
 
             public float _LODScreenTransition;
+            public int _LODIndex;
 
             public Transform _transform;
 
@@ -1337,13 +1339,18 @@ namespace HoudiniEngineUnity
                 {
                     if (lods[i].renderers != null && lods[i].renderers.Length > 0)
                     {
-                        GameObject childGO = lods[i].renderers[0].gameObject;
-                        HEU_InputDataMesh meshData = CreateSingleMeshData(childGO, bExportColliders);
-                        if (meshData != null)
+                        for (int r = 0; r < lods[i].renderers.Length; ++r)
                         {
-                            meshData._LODScreenTransition = lods[i].screenRelativeTransitionHeight;
-                            inputMeshes._inputMeshes.Add(meshData);
+                            GameObject childGO = lods[i].renderers[r].gameObject;
+                            HEU_InputDataMesh meshData = CreateSingleMeshData(childGO, bExportColliders);
+                            if (meshData != null)
+                            {
+                                meshData._LODScreenTransition = lods[i].screenRelativeTransitionHeight;
+                                meshData._LODIndex = i;
+                                inputMeshes._inputMeshes.Add(meshData);
+                            }
                         }
+                      
                     }
                 }
             }

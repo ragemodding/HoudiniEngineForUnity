@@ -399,7 +399,7 @@ namespace HoudiniEngineUnity
                 if (material == null)
                 {
                     // If not in Resources, try loading from project
-                    HEU_AssetDatabase.ImportAsset(relativePath, HEU_AssetDatabase.HEU_ImportAssetOptions.Default);
+                    //HEU_AssetDatabase.ImportAsset(relativePath, HEU_AssetDatabase.HEU_ImportAssetOptions.Default);
                     material = HEU_AssetDatabase.LoadAssetAtPath(relativePath, typeof(Material)) as Material;
                 }
             }

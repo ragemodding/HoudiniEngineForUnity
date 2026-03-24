@@ -170,7 +170,7 @@ namespace HoudiniEngineUnity
         /// <summary>
         /// Internal thread function to execute the work.
         /// </summary>
-        private void Run()
+        public void Run()
         {
             DoWork();
 

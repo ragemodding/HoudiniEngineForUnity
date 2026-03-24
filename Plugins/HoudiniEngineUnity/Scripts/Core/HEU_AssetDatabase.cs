@@ -456,13 +456,13 @@ namespace HoudiniEngineUnity
             fullPath = AssetDatabase.GenerateUniqueAssetPath(fullPath);
 
             CreatePathWithFolders(fullPath);
-            if (!AssetDatabase.IsValidFolder(fullPath))
-            {
-                HEU_Logger.LogErrorFormat(
-                    "Unable to create a valid asset cache folder: {0}! Check directory permission or that enough space is available!",
-                    fullPath);
-                fullPath = null;
-            }
+            //if (!AssetDatabase.IsValidFolder(fullPath))
+            //{
+            //    HEU_Logger.LogErrorFormat(
+            //        "Unable to create a valid asset cache folder: {0}! Check directory permission or that enough space is available!",
+            //        fullPath);
+            //    fullPath = null;
+            //}
 
             return fullPath;
 #else
